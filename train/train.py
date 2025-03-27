@@ -11,33 +11,10 @@ import seaborn as sns
 import time
 from tqdm import tqdm
 
-# Thêm thư mục gốc vào đường dẫn để import các modules
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
-# Import modules từ các file khác
 from data_loader import load_processed_dataset, prepare_data_for_cnn
-from models.CNN import CNN1d
-from models.Resnet import ResNet50, Bottleneck
-
-# Class kết hợp CNN-ResNet50
-class CNN_ResNet50(nn.Module):
-    def __init__(self, num_classes=5, input_channels=6):
-        super(CNN_ResNet50, self).__init__()
-        
-        # CNN làm bộ trích xuất đặc trưng
-        self.feature_extractor = CNN1d(num_channels=input_channels)
-        
-        # ResNet50 làm bộ phân loại
-        self.classifier = ResNet50(num_classes=num_classes, channels=64)  # 64 là out_channels của CNN
-        
-    def forward(self, x):
-        # Trích xuất đặc trưng bằng CNN
-        features = self.feature_extractor(x)
-        
-        # Phân loại bằng ResNet50
-        output = self.classifier(features)
-        
-        return output
+from models.CNN_Resnet50 import CNN_Resnet50
 
 def train_model(model, train_loader, val_loader, criterion, optimizer, num_epochs=10, device='cuda'):
     """
@@ -303,9 +280,9 @@ if __name__ == "__main__":
     val_loader = DataLoader(val_dataset, batch_size=batch_size)
     test_loader = DataLoader(test_dataset, batch_size=batch_size)
     
-    # Tạo model
+    # Tạo model sử dụng CNN_Resnet50 đã định nghĩa sẵn
     print("Khởi tạo model CNN-ResNet50...")
-    model = CNN_ResNet50(num_classes=num_classes, input_channels=X_train.shape[1])
+    model = CNN_Resnet50(num_classes=num_classes, num_channels=X_train.shape[1])
     
     # Định nghĩa hàm mất mát và thuật toán tối ưu
     criterion = nn.CrossEntropyLoss()
