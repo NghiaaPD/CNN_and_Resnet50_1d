@@ -266,6 +266,15 @@ if __name__ == "__main__":
         val_size=0.2
     )
     
+    # Tính trọng số ngược với tần suất
+    class_counts = np.bincount(y_train)
+    class_weights = 1.0 / class_counts
+    class_weights = class_weights / np.sum(class_weights) * len(class_counts)
+    class_weights = torch.FloatTensor(class_weights).to(device)
+
+    # Sử dụng CrossEntropyLoss có trọng số
+    criterion = nn.CrossEntropyLoss(weight=class_weights)
+    
     # Chuyển dữ liệu sang tensor và chuẩn bị cho CNN
     X_train_tensor, y_train_tensor = prepare_data_for_cnn(X_train, y_train)
     X_val_tensor, y_val_tensor = prepare_data_for_cnn(X_val, y_val)
@@ -284,8 +293,7 @@ if __name__ == "__main__":
     print("Khởi tạo model CNN-ResNet50...")
     model = CNN_Resnet50(num_classes=num_classes, num_channels=X_train.shape[1])
     
-    # Định nghĩa hàm mất mát và thuật toán tối ưu
-    criterion = nn.CrossEntropyLoss()
+    # Định nghĩa thuật toán tối ưu
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
     
     # Huấn luyện model

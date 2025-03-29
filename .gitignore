@@ -2,3 +2,5 @@ preprocess/test.ipynb
 preprocess/__pycache__
 RL-CNN_Resnet50.code-workspace
 data
+best_model.pth
+evaluation_results

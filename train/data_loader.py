@@ -5,6 +5,7 @@ import h5py
 from tqdm import tqdm
 from sklearn.model_selection import train_test_split
 import torch
+from imblearn.over_sampling import SMOTE
 
 def load_processed_dataset(processed_dir, subjects=None, test_size=0.2, val_size=0.2, random_state=42):
     """
@@ -132,7 +133,19 @@ def prepare_data_for_cnn(X, y, input_shape=(6, 7680, 1)):
         else:
             X = X[:, :, :target_times]
     
+    for i in range(X.shape[0]):
+        for c in range(X.shape[1]):
+            X[i, c] = (X[i, c] - np.mean(X[i, c])) / (np.std(X[i, c]) + 1e-8)
+    
     X_tensor = torch.from_numpy(X).float()
     y_tensor = torch.from_numpy(y).long()
     
     return X_tensor, y_tensor
+
+def prepare_balanced_data(X, y):
+    # Áp dụng SMOTE để cân bằng dữ liệu
+    sampler = SMOTE(random_state=42)
+    X_reshaped = X.reshape(X.shape[0], -1)  # Làm phẳng dữ liệu cho SMOTE
+    X_resampled, y_resampled = sampler.fit_resample(X_reshaped, y)
+    X_resampled = X_resampled.reshape(-1, X.shape[1], X.shape[2])  # Khôi phục shape
+    return X_resampled, y_resampled
